@@ -139,4 +139,15 @@ public sealed class Expense : BaseEntity
         return Result.Success();
     }
 
+    private static Result ValidateCategory(Guid expenseCategoryId, IReadOnlyList<Guid>? subCategoryIds)
+    {
+        if (expenseCategoryId == Guid.Empty)
+            return Result.Failure(ExpenseErrors.InvalidExpenseCategory);
+    
+        if (subCategoryIds is null || subCategoryIds.Count == 0)
+            return Result.Failure(ExpenseErrors.AtLeastOneSubCategoryRequired);
+    
+        return Result.Success();
+    }
+
 }
