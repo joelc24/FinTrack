@@ -139,13 +139,4 @@ public sealed class Expense : BaseEntity
         return Result.Success();
     }
 
-    public Result UpdateCreatedBy(Guid createdBy)
-    {
-        if (createdBy == Guid.Empty)
-            return Result.Failure(ExpenseErrors.InvalidCreatedBy);
-
-        CreatedBy = createdBy;
-        return Result.Success();
-    }
-
 }
