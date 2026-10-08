@@ -24,8 +24,15 @@ public sealed class Expense : BaseEntity
    public static Result<Expense> Create(string description, decimal totalAmount, Guid expenseCategoryId, Guid createdBy,
     DateTime startDate, DateTime finishDate, IReadOnlyList<Guid> subCategoryIds, Guid? accountId = null)
     {
-        if (Guid.Empty == expenseCategoryId)
-            return Result.Failure<Expense>(ExpenseErrors.InvalidExpenseCategory);
+        var categoryCheck = ValidateCategory(expenseCategoryId, subCategoryIds);
+        if (categoryCheck.IsFailure)
+            return Result.Failure<Expense>(categoryCheck.Error);
+
+        if (createdBy == Guid.Empty)
+            return Result.Failure<Expense>(ExpenseErrors.InvalidCreatedBy);
+
+        if (accountId == Guid.Empty)
+            return Result.Failure<Expense>(ExpenseErrors.InvalidAccount);
 
         if (string.IsNullOrWhiteSpace(description))
             return Result.Failure<Expense>(ExpenseErrors.EmptyDescription);
@@ -143,10 +150,10 @@ public sealed class Expense : BaseEntity
     {
         if (expenseCategoryId == Guid.Empty)
             return Result.Failure(ExpenseErrors.InvalidExpenseCategory);
-    
+
         if (subCategoryIds is null || subCategoryIds.Count == 0)
             return Result.Failure(ExpenseErrors.AtLeastOneSubCategoryRequired);
-    
+
         return Result.Success();
     }
 
