@@ -112,11 +112,9 @@ public sealed class Expense : BaseEntity
 
     public Result UpdateCategoryAndSubCategories(Guid expenseCategoryId, IReadOnlyList<Guid> subCategoryIds)
     {
-        if (expenseCategoryId == Guid.Empty)
-            return Result.Failure(ExpenseErrors.InvalidExpenseCategory);
-
-        if (subCategoryIds is null || subCategoryIds.Count == 0)
-            return Result.Failure(ExpenseErrors.AtLeastOneSubCategoryRequired);
+        var check = ValidateCategory(expenseCategoryId, subCategoryIds);
+        if (check.IsFailure)
+            return check;
 
         ExpenseCategoryId = expenseCategoryId;
 
