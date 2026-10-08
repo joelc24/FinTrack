@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FinTrack.Application/FinTrack.Application.csproj" />
+    <Project Path="src/FinTrack.Domain/FinTrack.Domain.csproj" />
+    <Project Path="src/FinTrack.Infrastructure/FinTrack.Infrastructure.csproj" />
+    <Project Path="src/FinTrack.WebApi/FinTrack.WebApi.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/FinTrack.Domain.UnitTests/FinTrack.Domain.UnitTests.csproj" />
+  </Folder>
+</Solution>
