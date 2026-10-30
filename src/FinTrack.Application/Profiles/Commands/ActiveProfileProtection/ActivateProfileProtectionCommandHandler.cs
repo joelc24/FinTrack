@@ -41,9 +41,9 @@ public sealed class ActivateProfileProtectionCommandHandler : ICommandHandler<Ac
             return Result.Failure(ProfileErrors.NotOwner);
 
         
-        var pinHash = _passwordHasher.Hash(request.ProfilePassword);
+        var passwordHash = _passwordHasher.Hash(request.ProfilePassword);
 
-        var activateResult = profile.ActivateProtection(pinHash);
+        var activateResult = profile.ActivateProtection(passwordHash);
         if (activateResult.IsFailure)
             return activateResult;
 

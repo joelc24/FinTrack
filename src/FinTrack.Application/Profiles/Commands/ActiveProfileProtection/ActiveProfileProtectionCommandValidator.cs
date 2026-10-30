@@ -12,6 +12,6 @@ public sealed class ActivateProfileProtectionCommandValidator : AbstractValidato
 
         RuleFor(command => command.ProfilePassword)
             .NotEmpty()
-            .WithMessage("El PIN es obligatorio.");
+            .WithMessage("La contraseña es obligatoria.");
     }
 }

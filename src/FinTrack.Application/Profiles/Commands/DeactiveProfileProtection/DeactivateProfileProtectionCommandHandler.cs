@@ -37,13 +37,13 @@ public sealed class DeactivateProfileProtectionCommandHandler : ICommandHandler<
         if (!isSelf && !_currentUser.IsAdmin)
             return Result.Failure(ProfileErrors.NotOwner);
 
-        // Chequeo de dominio ANTES de intentar verificar el PIN — si no está protegido,
+        // Chequeo de dominio ANTES de intentar verificar la CONTRASEÑA — si no está protegido,
         // ni siquiera llega a tocar PasswordHash (que sería null).
         if (!profile.IsProtected)
             return Result.Failure(ProfileErrors.ProfileUnprotected);
 
-        // Solo exige el PIN si eres TÚ mismo (no Admin actuando por otro) — la excepción
-        // de "olvidé mi PIN, ayúdame".
+        // Solo exige la contraseña si eres TÚ mismo (no Admin actuando por otro) — la excepción
+        // de "olvidé mi contraseña, ayúdame".
         if (isSelf && !_currentUser.IsAdmin)
         {
             if (string.IsNullOrWhiteSpace(request.ProfilePassword) || !_passwordHasher.Verify(request.ProfilePassword, profile.PasswordHash!))
