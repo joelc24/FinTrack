@@ -8,8 +8,8 @@ public class ExpenseTests
 
     //--------HELPERS----------------
     private static Result<Expense> CreateExpense(
-        string description, 
-        decimal totalAmount, 
+        string description = "Mercado", 
+        decimal totalAmount = 100_000m, 
         Guid? expenseCategoryId = null, 
         Guid? createdBy = null, 
         IReadOnlyList<Guid>? subCategoryIds = null,
@@ -25,5 +25,71 @@ public class ExpenseTests
         accountId
     );
 
-    
+    //------------------ CREATE ------------------
+    [Fact]
+    public void Create_WithValidData_ReturnSuccess()
+    {
+        var result = CreateExpense();
+
+        Assert.True(result.IsSuccess);
+        Assert.NotEqual(Guid.Empty, result.Value.Id);
+    }
+
+    [Fact]
+    public void Create_WithPaddedDescription_TrimsIt()
+    {
+        var result = CreateExpense(description: "   Mercado   ");
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("Mercado", result.Value.Description);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("       ")]
+    public void Create_WithBlankDescription_ReturnsEmptyDescriptionError(string invalidDescription)
+    {
+        var result = CreateExpense(description: invalidDescription);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(ExpenseErrors.EmptyDescription, result.Error);
+    }
+
+    [Fact]
+    public void Create_WithoutSubCategories_ReturnsAtLeastOneSubCategoryError()
+    {
+        var result = CreateExpense(subCategoryIds: []);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(ExpenseErrors.AtLeastOneSubCategoryRequired, result.Error);
+    }
+
+    [Fact]
+    public void Create_WithEmptyCreatedBy_ReturnsInvalidCreatedByError()
+    {
+        var result = CreateExpense(createdBy: Guid.Empty);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(ExpenseErrors.InvalidCreatedBy, result.Error);
+    }
+
+    [Fact]
+    public void Create_WithEmptyAccountId_ReturnsInvalidAccountError()
+    {
+        var result = CreateExpense(accountId: Guid.Empty);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(ExpenseErrors.InvalidAccount, result.Error);
+    }
+
+    [Fact]
+    public void Create_WithDuplicatedSubCategories_TagsEachOnlyOnce()
+    {
+        var subCategoryId = Guid.CreateVersion7();
+        var result = CreateExpense(subCategoryIds: [subCategoryId, subCategoryId]);
+
+        Assert.True(result.IsSuccess);
+        Assert.Single(result.Value.SubCategoryTags);
+    }
+
 }
