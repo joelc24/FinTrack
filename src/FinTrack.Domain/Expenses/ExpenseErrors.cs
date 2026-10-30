@@ -8,6 +8,7 @@ public static class ExpenseErrors
     public static readonly Error InvalidExpenseCategory = Error.Validation("Expennse.InvalidExpenseCategory", "La categoria del gasto es invalida");
     public static readonly Error InvalidTotalAmount = Error.Validation("Expense.InvalidTotalAmount", "El total del gasto debe ser mayor que cero.");
     public static readonly Error InvalidAccount = Error.Validation("Expense.InvalidAccount", "La cuenta del gasto es invalida.");
+    public static readonly Error InvalidProfile = Error.Validation("Expense.InvalidProfile", "El perfil del gasto es invalido.");
     public static readonly Error NotOwnedByAccount = Error.Validation("Expense.NotOwnedByAccount", "No eres el propietario de la cuenta.");
     public static readonly Error InvalidCreatedBy = Error.Validation("Expense.InvalidCreatedBy", "El creador del gasto es invalido.");
     public static readonly Error OverAllocated = Error.Validation("Expense.OverAllocated", "La suma de asignaciones supera el total del gasto.");

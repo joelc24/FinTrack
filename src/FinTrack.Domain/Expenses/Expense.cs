@@ -75,6 +75,12 @@ public sealed class Expense : BaseEntity
     
     public Result AllocateTo(Guid profileId, decimal amount, DateOnly? paidAt = null)
     {
+        if (profileId == Guid.Empty)
+            return Result.Failure(ExpenseErrors.InvalidProfile);
+
+        if (_allocations.Any(x => x.ProfileId == profileId))
+            return Result.Failure(ExpenseErrors.DuplicateAllocation);
+
         var amountResult = Money.Create(amount);
         if (amountResult.IsFailure)
             return amountResult;
