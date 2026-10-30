@@ -138,4 +138,29 @@ public class ExpenseTests
         Assert.Equal(ExpenseErrors.OverAllocated, result.Error);
         Assert.Equal(100_000m, expense.TotalAmount.Amount); // Ensure the total amount was not updated
     }
+
+    [Fact]
+    public void UpdateTotalAmount_EqualToAllocatedSum_Succeeds()
+    {
+        var expense = CreateExpense(totalAmount: 100_000m).Value;
+        expense.AllocateTo(Guid.CreateVersion7(), 80_000m);
+
+        var result = expense.UpdateTotalAmount(80_000m);
+
+        Assert.True(result.IsSuccess);
+    }
+
+    //--------------- TAGSUBCATEGORY ----------------
+    [Fact]
+    public void TagSubCategory_WhenAlreadyTagged_ReturnsDuplicateError()
+    {
+        var subCategoryId = Guid.CreateVersion7();
+        var expense = CreateExpense(subCategoryIds: [subCategoryId]).Value;
+
+        var result = expense.TagSubCategory(subCategoryId);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(ExpenseErrors.DuplicateSubCategoryTag, result.Error);
+        Assert.Single(expense.SubCategoryTags); // Ensure the subcategory was not added again
+    }
 }
