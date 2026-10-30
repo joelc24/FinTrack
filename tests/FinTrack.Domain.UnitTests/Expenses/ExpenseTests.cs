@@ -92,7 +92,7 @@ public class ExpenseTests
         Assert.Single(result.Value.SubCategoryTags);
     }
 
-    //-------------- ALOCATE ------------------
+    //-------------- ALLOCATETO ------------------
     [Fact]
     public void AllocateTo_WithAmountWithinTotal_AddsAllocation()
     {
@@ -117,10 +117,25 @@ public class ExpenseTests
     {
         var expense = CreateExpense(totalAmount: 100_000m).Value;
         expense.AllocateTo(Guid.CreateVersion7(), 70_000m);
+        
         var result = expense.AllocateTo(Guid.CreateVersion7(), 50_000m);
 
         Assert.True(result.IsFailure);
         Assert.Equal(ExpenseErrors.OverAllocated, result.Error);
+        Assert.Single(expense.Allocations); // Ensure the second allocation was not added
     }
 
+    //--------------- UPDATETOTALAMOUNT ----------------
+    [Fact]
+    public void UpdateTotalAmount_BelowAllocatedSum_ReturnsOverAllocatedError()
+    {
+        var expense = CreateExpense(totalAmount: 100_000m).Value;
+        expense.AllocateTo(Guid.CreateVersion7(), 80_000m);
+
+        var result = expense.UpdateTotalAmount(70_000m);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(ExpenseErrors.OverAllocated, result.Error);
+        Assert.Equal(100_000m, expense.TotalAmount.Amount); // Ensure the total amount was not updated
+    }
 }
