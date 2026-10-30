@@ -11,6 +11,7 @@ public static class ExpenseErrors
     public static readonly Error NotOwnedByAccount = Error.Validation("Expense.NotOwnedByAccount", "No eres el propietario de la cuenta.");
     public static readonly Error InvalidCreatedBy = Error.Validation("Expense.InvalidCreatedBy", "El creador del gasto es invalido.");
     public static readonly Error OverAllocated = Error.Validation("Expense.OverAllocated", "La suma de asignaciones supera el total del gasto.");
+    public static readonly Error DuplicateAllocation = Error.Validation("Expense.DuplicateAllocation", "La asignación ya existe.");
     public static readonly Error DuplicateSubCategoryTag =
         Error.Conflict("Expense.DuplicateSubCategoryTag", "Esa subcategoría ya está asignada a este gasto.");
 

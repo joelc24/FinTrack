@@ -125,6 +125,20 @@ public class ExpenseTests
         Assert.Single(expense.Allocations); // Ensure the second allocation was not added
     }
 
+    [Fact]
+    public void AllocateTo_WhenDuplicateAllocation_ReturnsDuplicateAllocationError()
+    {
+        var profileId = Guid.CreateVersion7();
+        var expense = CreateExpense(totalAmount: 100_000m).Value;
+        expense.AllocateTo(profileId, 80_000m);
+
+        var result = expense.AllocateTo(profileId, 20_000m);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(ExpenseErrors.DuplicateAllocation, result.Error);
+        Assert.Single(expense.Allocations); // Ensure the second allocation was not added
+    }
+
     //--------------- UPDATETOTALAMOUNT ----------------
     [Fact]
     public void UpdateTotalAmount_BelowAllocatedSum_ReturnsOverAllocatedError()
