@@ -40,8 +40,8 @@ public sealed class SelectProfileCommandHandler : ICommandHandler<SelectProfileC
 
         if (profile.IsProtected)
         {
-            if (string.IsNullOrWhiteSpace(request.Pin) || !_passwordHasher.Verify(request.Pin, profile.PasswordHash!))
-                return Result.Failure<SessionResponseDto>(ProfileErrors.InvalidPin);
+            if (string.IsNullOrWhiteSpace(request.ProfilePassword) || !_passwordHasher.Verify(request.ProfilePassword, profile.PasswordHash!))
+                return Result.Failure<SessionResponseDto>(ProfileErrors.InvalidProfilePassword);
         }
 
         var account = await _accountRepository.GetByIdAsync(profile.AccountId, cancellationToken);

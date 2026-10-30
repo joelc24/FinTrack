@@ -26,7 +26,7 @@ public sealed class ActivateProfileProtectionCommandHandler : ICommandHandler<Ac
 
     public async Task<Result> Handle(ActivateProfileProtectionCommand request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(request.Pin))
+        if (string.IsNullOrWhiteSpace(request.ProfilePassword))
             return Result.Failure(ProfileErrors.PasswordInvalid);
 
         var profile = await _profileRepository.GetByIdAsync(request.ProfileId, cancellationToken);
@@ -41,7 +41,7 @@ public sealed class ActivateProfileProtectionCommandHandler : ICommandHandler<Ac
             return Result.Failure(ProfileErrors.NotOwner);
 
         
-        var pinHash = _passwordHasher.Hash(request.Pin);
+        var pinHash = _passwordHasher.Hash(request.ProfilePassword);
 
         var activateResult = profile.ActivateProtection(pinHash);
         if (activateResult.IsFailure)

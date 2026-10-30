@@ -46,8 +46,8 @@ public sealed class DeactivateProfileProtectionCommandHandler : ICommandHandler<
         // de "olvidé mi PIN, ayúdame".
         if (isSelf && !_currentUser.IsAdmin)
         {
-            if (string.IsNullOrWhiteSpace(request.Pin) || !_passwordHasher.Verify(request.Pin, profile.PasswordHash!))
-                return Result.Failure(ProfileErrors.InvalidPin);
+            if (string.IsNullOrWhiteSpace(request.ProfilePassword) || !_passwordHasher.Verify(request.ProfilePassword, profile.PasswordHash!))
+                return Result.Failure(ProfileErrors.InvalidProfilePassword);
         }
 
         var deactivateResult = profile.DeactivateProtection();

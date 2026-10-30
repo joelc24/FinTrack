@@ -12,7 +12,7 @@ public static class ProfileErrors
     public static readonly Error ProfileUnprotected = Error.Validation("Profile.ProfileUnprotected", "no se puede desactivar la proteccion en una cuenta desprotegida");
     public static readonly Error PasswordInvalid = Error.Validation("Profile.PasswordInvalid", "La contraseña proporcionada no es valida.");
     public static readonly Error InvalidAccount = Error.Validation("Profile.InvalidAccount", "La cuenta proporcionada no es valida.");
-    public static readonly Error InvalidPin = Error.Validation("Profile.InvalidPin", "El PIN ingresado no es correcto.");
+    public static readonly Error InvalidProfilePassword = Error.Validation("Profile.InvalidProfilePassword", "La contraseña del perfil ingresada no es correcta.");
     public static readonly Error NotOwnedByAccount = Error.Validation("Profile.NotOwnedByAccount", "El perfil no seleccionado no pertenece a la cuenta.");
     public static readonly Error NotOwner = Error.Validation("Profile.NotOwner", "No es el propietario.");
     public static Error NotFound(Guid profileId) => Error.Validation("Profile.InvalidAccount", $"perfil con id {profileId} no encontrado.");

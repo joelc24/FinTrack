@@ -48,7 +48,7 @@ public sealed class ProfilesController : ApiControllerBase
     [HttpPost("{id:guid}/protection/activate")]
     public async Task<IActionResult> ActivateProtection(Guid id, ActivateProfileProtectionRequest request, CancellationToken ct)
     {
-        var result = await _sender.Send(new ActivateProfileProtectionCommand(id, request.Pin), ct);
+        var result = await _sender.Send(new ActivateProfileProtectionCommand(id, request.ProfilePassword), ct);
         return HandleResult(result);
     }
 
@@ -56,7 +56,7 @@ public sealed class ProfilesController : ApiControllerBase
     [HttpPost("{id:guid}/protection/deactivate")]
     public async Task<IActionResult> DeactivateProtection(Guid id, DeactivateProfileProtectionRequest request, CancellationToken ct)
     {
-        var result = await _sender.Send(new DeactivateProfileProtectionCommand(id, request.Pin), ct);
+        var result = await _sender.Send(new DeactivateProfileProtectionCommand(id, request.ProfilePassword), ct);
         return HandleResult(result);
     }
 }

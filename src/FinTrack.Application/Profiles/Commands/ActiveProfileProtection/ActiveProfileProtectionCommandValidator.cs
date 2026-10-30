@@ -10,7 +10,7 @@ public sealed class ActivateProfileProtectionCommandValidator : AbstractValidato
             .NotEmpty()
             .WithMessage("El identificador del perfil debe ser un GUID válido.");
 
-        RuleFor(command => command.Pin)
+        RuleFor(command => command.ProfilePassword)
             .NotEmpty()
             .WithMessage("El PIN es obligatorio.");
     }
