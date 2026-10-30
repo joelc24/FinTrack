@@ -92,4 +92,35 @@ public class ExpenseTests
         Assert.Single(result.Value.SubCategoryTags);
     }
 
+    //-------------- ALOCATE ------------------
+    [Fact]
+    public void AllocateTo_WithAmountWithinTotal_AddsAllocation()
+    {
+        var expense = CreateExpense(totalAmount: 100_000m).Value;
+        var result = expense.AllocateTo(Guid.CreateVersion7(), 40_000m);
+
+        Assert.True(result.IsSuccess);
+        Assert.Single(expense.Allocations);
+    }
+
+    [Fact]
+    public void AllocateTo_WithAmountEqualToTotal_Succeeds()
+    {
+        var expense = CreateExpense(totalAmount: 100_000m).Value;
+        var result = expense.AllocateTo(Guid.CreateVersion7(), 100_000m);
+
+        Assert.True(result.IsSuccess);
+    }
+
+    [Fact]
+    public void AllocateTo_WhenSumExceedsTotal_ReturnsOverAllocatedError()
+    {
+        var expense = CreateExpense(totalAmount: 100_000m).Value;
+        expense.AllocateTo(Guid.CreateVersion7(), 70_000m);
+        var result = expense.AllocateTo(Guid.CreateVersion7(), 50_000m);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(ExpenseErrors.OverAllocated, result.Error);
+    }
+
 }
