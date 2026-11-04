@@ -109,7 +109,7 @@ public class ExpenseTests
         var expense = CreateExpense(totalAmount: 100_000m).Value;
         var result = expense.AllocateTo(Guid.CreateVersion7(), 100_000m);
 
-        Assert.True(result.IsSuccess);
+        Assert.False(result.IsSuccess);
     }
 
     [Fact]
