@@ -27,6 +27,8 @@ jobs:
           run: dotnet restore
         - name: "Build"
           run: dotnet build --no-restore
+        - name: "Sleep for 60 seconds"
+          run: "sleep 60"
         - name: "Run tests"
           run: dotnet test --no-build --verbosity normal --logger trx --results-directory ./TestResults
         - name: "Upload test results"
