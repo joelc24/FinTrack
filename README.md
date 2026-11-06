@@ -1,10 +1,12 @@
 # FinTrack
 
+[![CI](https://github.com/joelc24/FinTrack/actions/workflows/ci.yml/badge.svg)](https://github.com/joelc24/FinTrack/actions/workflows/ci.yml)
+
 API REST para el seguimiento de gastos e ingresos personales y compartidos. Una cuenta agrupa varios perfiles (por ejemplo, los miembros de un hogar), y los gastos compartidos se reparten entre los perfiles que participan.
 
 Es un proyecto personal con el que practico arquitectura limpia y diseño orientado al dominio en .NET: la lógica de negocio vive en el dominio, los casos de uso están separados de la infraestructura y los errores esperados se modelan con el patrón Result en lugar de excepciones.
 
-**Stack:** C#, .NET 10, ASP.NET Core, EF Core, SQL Server, MediatR, FluentValidation, JWT, Scalar (OpenAPI), xUnit y NSubstitute.
+**Stack:** C#, .NET 10, ASP.NET Core, EF Core, SQL Server, MediatR, FluentValidation, JWT, Scalar (OpenAPI), xUnit, NSubstitute, Docker y GitHub Actions.
 
 ## Qué demuestra este proyecto
 
@@ -14,6 +16,7 @@ Es un proyecto personal con el que practico arquitectura limpia y diseño orient
 - **Autenticación en dos etapas:** primero se inicia sesión con la cuenta y luego se elige un perfil, con un token distinto para cada paso y políticas de autorización por tipo de token.
 - **Persistencia:** repositorios + Unit of Work sobre EF Core; las migraciones y el seed de categorías se aplican al iniciar.
 - **Pruebas unitarias del dominio** con xUnit y NSubstitute.
+- **CI/CD y contenedores:** GitHub Actions compila, ejecuta las pruebas y publica la imagen Docker en GitHub Container Registry.
 
 ## Arquitectura
 
@@ -97,7 +100,7 @@ La documentación interactiva completa está en Scalar (ver [Ejecución local](#
 
 ## Ejecución local
 
-**Requisitos:** [.NET SDK 10](https://dotnet.microsoft.com/download), Docker y `openssl` (opcional, para generar la clave JWT).
+**Requisitos:** Docker y, para ejecutar la API fuera de Docker, [.NET SDK 10](https://dotnet.microsoft.com/download). `openssl` es opcional, para generar la clave JWT.
 
 **1. Clonar y preparar variables de entorno**
 
@@ -107,21 +110,42 @@ cd FinTrack
 cp .env.template .env
 ```
 
-Edita `.env` y define `DB_PASSWORD` (debe cumplir la política de contraseñas de SQL Server).
+Edita `.env`. `DB_PASSWORD` y `JWT_SECRET_KEY` son obligatorias; la contraseña debe cumplir la política de contraseñas de SQL Server. La clave JWT se puede generar con `openssl rand -base64 32` (sintaxis de bash; en Windows puedes ejecutarlo desde Git Bash).
 
-**2. Levantar SQL Server**
+| Variable | Para qué sirve | Valor por defecto |
+|---|---|---|
+| `DB_PASSWORD` | Contraseña del usuario `sa` de SQL Server | Obligatoria; sin valor por defecto |
+| `JWT_SECRET_KEY` | Clave para firmar los tokens JWT | Obligatoria; sin valor por defecto |
+| `SQLSERVER_HOST_PORT` | Puerto del host publicado por SQL Server | `1433` |
+| `API_HOST_PORT` | Puerto del host publicado por la API | `8080` |
+
+**2. Ejecutar el proyecto**
+
+**a) Todo en Docker**
 
 ```bash
-docker compose up -d
+docker compose up -d --build
 ```
+
+Esta opción no requiere tener .NET instalado. Con el puerto por defecto, la documentación interactiva queda disponible en `http://localhost:8080/scalar`.
+
+**b) Base de datos en Docker y API con `dotnet run`**
+
+Primero levanta solo SQL Server:
+
+```bash
+docker compose up -d sqlserver
+```
+
+Los pasos 3 y 4 solo aplican a esta opción (b).
 
 **3. Configurar los secretos de la API**
 
-`appsettings.json` solo contiene valores de ejemplo; los reales se guardan con *user-secrets*:
+`appsettings.json` solo contiene valores de ejemplo; para ejecutar la API localmente, los valores se guardan con *user-secrets*. Si cambiaste `SQLSERVER_HOST_PORT`, usa ese mismo puerto en la cadena de conexión:
 
 ```bash
 cd src/FinTrack.WebApi
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost,1433;Database=FinTrack;User Id=sa;Password=<tu DB_PASSWORD>;TrustServerCertificate=True;Encrypt=False;"
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost,1433;Database=FinTrack;User Id=sa;Password=<DB_PASSWORD>;TrustServerCertificate=True;Encrypt=False;"
 dotnet user-secrets set "Jwt:SecretKey" "$(openssl rand -base64 32)"
 ```
 
@@ -133,13 +157,21 @@ dotnet run --launch-profile https
 
 Al iniciar, la API aplica las migraciones y carga el seed de categorías de gasto automáticamente. En desarrollo, la documentación interactiva queda disponible en `https://localhost:7219/scalar` (o `http://localhost:5185/scalar`).
 
-> El `Dockerfile` de `FinTrack.WebApi` genera la imagen de la API, pero el `compose.yml` por ahora solo levanta la base de datos.
+**Solución de problemas**
+
+En Windows, si Docker no puede publicar el puerto 1433 y muestra un error de acceso a un socket denegado por permisos, ese puerto puede estar reservado por el sistema. Define `SQLSERVER_HOST_PORT` en `.env` con otro puerto libre, por ejemplo `61433`. Si usas la opción b, ese puerto debe coincidir con el de la cadena de conexión de los *user-secrets*.
+
+El `compose.yml` está pensado para desarrollo (usa `ASPNETCORE_ENVIRONMENT=Development`), no es una configuración de producción.
 
 ## Pruebas
 
 ```bash
 dotnet test
 ```
+
+## CI/CD
+
+En cada pull request hacia `main` y en cada push a `main`, el workflow compila el proyecto, ejecuta las pruebas y sube su reporte como artefacto. Al integrarse cambios en `main`, un segundo job, que depende de que el primero pase, construye la imagen Docker y la publica en GitHub Container Registry (`ghcr.io/joelc24/fintrack`) con las etiquetas `main` y `sha-<hash corto>`. La rama `main` está protegida por un ruleset que exige que pase el check `build`.
 
 ## Limitaciones conocidas y próximos pasos
 
@@ -148,7 +180,7 @@ dotnet test
 - Hay pruebas unitarias de parte del dominio; faltan más entidades, handlers y pruebas de integración (con Testcontainers).
 - Balance por perfil (ingresos menos lo pagado): pendiente.
 - Autenticación: definir duraciones distintas para el token de cuenta y el de sesión, y agregar refresh token.
-- Agregar la API al `compose.yml` para levantar todo con un solo comando.
+- La imagen se publica en GHCR, pero todavía no hay despliegue en la nube.
 
 ## Frontend
 
