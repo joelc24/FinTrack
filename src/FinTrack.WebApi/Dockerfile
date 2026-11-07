@@ -10,7 +10,7 @@ WORKDIR /src
 COPY ["src/FinTrack.Domain/FinTrack.Domain.csproj", "src/FinTrack.Domain/"]
 COPY ["src/FinTrack.Application/FinTrack.Application.csproj", "src/FinTrack.Application/"]
 COPY ["src/FinTrack.Infrastructure/FinTrack.Infrastructure.csproj", "src/FinTrack.Infrastructure/"]
-COPY ["src/FinTrack.WebApi/FinTrack.WebApi.csproj", "src/FinTrack.WebApi/"]
+COPY ["src/FinTrack.WebApi/FinTrack.WebAPi.csproj", "src/FinTrack.WebApi/"]
 
 RUN dotnet restore "src/FinTrack.WebApi/FinTrack.WebApi.csproj"
 
