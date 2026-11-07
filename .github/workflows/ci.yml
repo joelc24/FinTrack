@@ -38,6 +38,21 @@ jobs:
           retention-days: 5
         if: ${{ !cancelled() }}
 
+  docker-build:
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v7
+      - name: "Set up Docker Buildx"
+        uses: docker/setup-buildx-action@v4
+      - name: "Build Docker image"
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: src/FinTrack.WebApi/Dockerfile
+          push: false
+
   publish:
     timeout-minutes: 15
     runs-on: ubuntu-24.04
@@ -73,4 +88,3 @@ jobs:
           file: src/FinTrack.WebApi/Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-    
