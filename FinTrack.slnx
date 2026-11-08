@@ -6,7 +6,7 @@
     <Project Path="src/FinTrack.WebApi/FinTrack.WebApi.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="FinTrack.WebApi.IntegrationTests/FinTrack.WebApi.IntegrationTests.csproj" Id="344f398f-e2e4-4345-9e3e-a1b0549f54e2" />
     <Project Path="tests/FinTrack.Domain.UnitTests/FinTrack.Domain.UnitTests.csproj" />
+    <Project Path="tests/FinTrack.WebApi.IntegrationTests/FinTrack.WebApi.IntegrationTests.csproj" />
   </Folder>
 </Solution>
