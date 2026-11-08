@@ -6,7 +6,7 @@ API REST para el seguimiento de gastos e ingresos personales y compartidos. Una 
 
 Es un proyecto personal con el que practico arquitectura limpia y diseño orientado al dominio en .NET: la lógica de negocio vive en el dominio, los casos de uso están separados de la infraestructura y los errores esperados se modelan con el patrón Result en lugar de excepciones.
 
-**Stack:** C#, .NET 10, ASP.NET Core, EF Core, SQL Server, MediatR, FluentValidation, JWT, Scalar (OpenAPI), xUnit, NSubstitute, Docker y GitHub Actions.
+**Stack:** C#, .NET 10, ASP.NET Core, EF Core, SQL Server, MediatR, FluentValidation, JWT, Scalar (OpenAPI), xUnit, NSubstitute, Testcontainers, Docker y GitHub Actions.
 
 ## Qué demuestra este proyecto
 
@@ -15,7 +15,7 @@ Es un proyecto personal con el que practico arquitectura limpia y diseño orient
 - **Manejo de errores con `Result`:** los fallos de negocio son valores explícitos, y un manejador global de excepciones cubre lo inesperado con `ProblemDetails`.
 - **Autenticación en dos etapas:** primero se inicia sesión con la cuenta y luego se elige un perfil, con un token distinto para cada paso y políticas de autorización por tipo de token.
 - **Persistencia:** repositorios + Unit of Work sobre EF Core; las migraciones y el seed de categorías se aplican al iniciar.
-- **Pruebas unitarias del dominio** con xUnit y NSubstitute.
+- **Pruebas unitarias del dominio** con xUnit y NSubstitute, y **pruebas de integración de la API** con Testcontainers.
 - **CI/CD y contenedores:** GitHub Actions compila, ejecuta las pruebas y publica la imagen Docker en GitHub Container Registry.
 
 ## Arquitectura
@@ -28,7 +28,8 @@ FinTrack.slnx
 │   ├── FinTrack.Infrastructure  # EF Core, repositorios, JWT, hash de contraseñas, seed
 │   └── FinTrack.WebApi          # Controladores, autenticación, OpenAPI/Scalar
 └── tests/
-    └── FinTrack.Domain.UnitTests
+    ├── FinTrack.Domain.UnitTests           # Pruebas unitarias del dominio
+    └── FinTrack.WebApi.IntegrationTests    # Pruebas de integración de la API
 ```
 
 ```mermaid
@@ -165,19 +166,31 @@ El `compose.yml` está pensado para desarrollo (usa `ASPNETCORE_ENVIRONMENT=Deve
 
 ## Pruebas
 
+Tengo dos tipos de pruebas:
+
+- **Pruebas unitarias del dominio** (`tests/FinTrack.Domain.UnitTests`): comprueban reglas de entidades como cuentas y gastos, y no necesitan Docker.
+- **Pruebas de integración de la API** (`tests/FinTrack.WebApi.IntegrationTests`): arrancan la API en memoria con `WebApplicationFactory` contra un SQL Server real en un contenedor creado con Testcontainers. Así no tocan la base de desarrollo. Requieren Docker en ejecución; la primera ejecución descarga la imagen de SQL Server y tarda más.
+
 ```bash
+# Todas las pruebas
 dotnet test
+
+# Solo pruebas unitarias
+dotnet test tests/FinTrack.Domain.UnitTests
+
+# Solo pruebas de integración
+dotnet test tests/FinTrack.WebApi.IntegrationTests
 ```
 
 ## CI/CD
 
-En cada pull request hacia `main` y en cada push a `main`, el workflow compila el proyecto, ejecuta las pruebas y sube su reporte como artefacto. Al integrarse cambios en `main`, un segundo job, que depende de que el primero pase, construye la imagen Docker y la publica en GitHub Container Registry (`ghcr.io/joelc24/fintrack`) con las etiquetas `main` y `sha-<hash corto>`. La rama `main` está protegida por un ruleset que exige que pase el check `build`.
+En cada pull request hacia `main` y en cada push a `main`, el workflow restaura dependencias, compila, ejecuta primero las pruebas unitarias y después intenta ejecutar las de integración con `dotnet test tests/FinTrack.IntegrationTests`, y sube los resultados como artefacto. En pushes a `main`, si ese job pasa, construye y publica la imagen Docker en GitHub Container Registry.
 
 ## Limitaciones conocidas y próximos pasos
 
 - Los listados de gastos aún no están paginados.
 - La validación de pertenencia del recurso en los handlers está en revisión.
-- Hay pruebas unitarias de parte del dominio; faltan más entidades, handlers y pruebas de integración (con Testcontainers).
+- Las pruebas de integración actuales cubren el registro de cuentas; falta ampliarlas a más endpoints, por ejemplo los que requieren sesión, y cubrir más entidades y handlers con pruebas unitarias.
 - Balance por perfil (ingresos menos lo pagado): pendiente.
 - Autenticación: definir duraciones distintas para el token de cuenta y el de sesión, y agregar refresh token.
 - La imagen se publica en GHCR, pero todavía no hay despliegue en la nube.
