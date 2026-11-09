@@ -1,9 +1,11 @@
-﻿using System.Net;
+﻿using FinTrack.WebApi.IntegrationTests.Fixtures;
+using System.Net;
 using System.Text.Json;
 
 namespace FinTrack.WebApi.IntegrationTests
 {
-    public class AuthTests : IClassFixture<CustomWebApplicationFactory<Program>>
+    [Collection(IntegrationCollection.Name)]
+    public class AuthTests
     {
         private readonly HttpClient _httpClient;
 

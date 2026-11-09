@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Testing;
 using Testcontainers.MsSql;
 
-namespace FinTrack.WebApi.IntegrationTests;
+namespace FinTrack.WebApi.IntegrationTests.Fixtures;
 
 
 public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProgram>, IAsyncLifetime
