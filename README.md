@@ -184,7 +184,7 @@ dotnet test tests/FinTrack.WebApi.IntegrationTests
 
 ## CI/CD
 
-En cada pull request hacia `main` y en cada push a `main`, el workflow restaura dependencias, compila, ejecuta primero las pruebas unitarias y después intenta ejecutar las de integración con `dotnet test tests/FinTrack.IntegrationTests`, y sube los resultados como artefacto. En pushes a `main`, si ese job pasa, construye y publica la imagen Docker en GitHub Container Registry.
+En cada pull request hacia main y en cada push a main, el workflow restaura dependencias, compila, ejecuta primero las pruebas unitarias y después las de integración, y sube los resultados como artefacto. En los pull requests, un job adicional (docker-build) construye la imagen Docker sin publicarla, para detectar errores del Dockerfile antes del merge. En los pushes a main, si el job de pruebas pasa, otro job construye y publica la imagen en GitHub Container Registry (ghcr.io/joelc24/fintrack) con las etiquetas main y sha-<hash corto>. La rama main está protegida por un ruleset que exige que pasen los checks build y docker-build.
 
 ## Limitaciones conocidas y próximos pasos
 
