@@ -78,6 +78,42 @@ namespace FinTrack.WebApi.IntegrationTests
             Assert.NotEmpty(problems.Errors["Password"]);
         }
 
-        
+        [Fact]
+        public async Task Login_WhenDataIsValid_ReturnsSuccess()
+        {
+            var request = new
+            {
+                Name = "John",
+                LastName = "Doe",
+                UserName = "JohnDoe" + Guid.NewGuid(),
+                Email = "john_" + Guid.NewGuid() + "@example.com",
+                Password = "abc123"
+            };
+
+            var registerResponse = await _httpClient.PostAsJsonAsync("api/auth/register", request);
+            registerResponse.EnsureSuccessStatusCode();
+
+            var loginRequest = new
+            {
+                request.Email,
+                request.Password
+            };
+
+            var loginResponse = await _httpClient.PostAsJsonAsync("api/auth/login", loginRequest);
+            var body = await loginResponse.Content.ReadAsStringAsync();
+
+            Assert.True(
+                HttpStatusCode.OK == loginResponse.StatusCode,
+                $"Se esperaba un 200 Ok y llego {(int)loginResponse.StatusCode}. Cuerpo: {body}"
+            );
+
+            var loginResponseDto = JsonSerializer.Deserialize<LoginResponseTestDto>(body, JsonSerializerOptions.Web);
+
+            Assert.NotNull(loginResponseDto);
+            Assert.NotEqual(Guid.Empty, loginResponseDto.AccountId);
+            Assert.False(string.IsNullOrWhiteSpace(loginResponseDto.AccountToken));
+            Assert.NotEmpty(loginResponseDto.Profiles);
+            Assert.All(loginResponseDto.Profiles, l => Assert.NotEqual(Guid.Empty, l.Id));
+        }
     }
 }
