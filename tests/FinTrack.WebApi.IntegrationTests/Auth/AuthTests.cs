@@ -24,7 +24,7 @@ namespace FinTrack.WebApi.IntegrationTests
         }
 
         [Fact]
-        public async Task Register_WhenIsValid_ReturnAccountId()
+        public async Task Register_WhenIsValid_ReturnLoggedInUser()
         {
             var request = new
             {
@@ -43,8 +43,12 @@ namespace FinTrack.WebApi.IntegrationTests
                 $"Se esperaba 200 y llegó {(int)response.StatusCode}. Cuerpo: {body}"
             );
 
-            var accountId = JsonSerializer.Deserialize<Guid>(body);
-            Assert.NotEqual(Guid.Empty, accountId);
+            var loggedInUser = JsonSerializer.Deserialize<LoginResponseTestDto>(body);
+            Assert.NotNull(loggedInUser);
+            Assert.NotEqual(Guid.Empty, loggedInUser.AccountId);
+            Assert.False(string.IsNullOrWhiteSpace(loggedInUser.AccountToken));
+            Assert.NotEmpty(loggedInUser.Profiles);
+            Assert.All(loggedInUser.Profiles, p => Assert.NotEqual(Guid.Empty, p.Id));
         }
 
         [Fact]
