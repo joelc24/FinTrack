@@ -43,7 +43,7 @@ namespace FinTrack.WebApi.IntegrationTests
                 $"Se esperaba 200 y llegó {(int)response.StatusCode}. Cuerpo: {body}"
             );
 
-            var loggedInUser = JsonSerializer.Deserialize<LoginResponseTestDto>(body);
+            var loggedInUser = JsonSerializer.Deserialize<LoginResponseTestDto>(body, JsonSerializerOptions.Web);
             Assert.NotNull(loggedInUser);
             Assert.NotEqual(Guid.Empty, loggedInUser.AccountId);
             Assert.False(string.IsNullOrWhiteSpace(loggedInUser.AccountToken));
